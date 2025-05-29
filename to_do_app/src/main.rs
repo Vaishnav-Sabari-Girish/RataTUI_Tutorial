@@ -22,6 +22,21 @@ struct TodoItems {
 
 fn main() -> Result<()> {
     let mut state = AppState::default();
+    state.items.push(TodoItems{
+        is_done: false, 
+        description: String::from("Finish the app")
+    });
+
+    state.items.push(TodoItems{
+        is_done: true, 
+        description: String::from("Do some shit ")
+    });
+
+    state.items.push(TodoItems{
+        is_done: false, 
+        description: String::from("Do somemore shit")
+    });
+
     color_eyre::install()?;
 
     let terminal = ratatui::init();
