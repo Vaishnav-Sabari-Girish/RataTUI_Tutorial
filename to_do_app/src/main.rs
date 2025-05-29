@@ -75,6 +75,11 @@ fn run(mut terminal: DefaultTerminal, app_state: &mut AppState) -> Result<()> {
                         'k' => {
                             app_state.list_state.select_previous();
                         }
+                        'D' => {
+                            if let Some(selected_item) = app_state.list_state.selected(){
+                                app_state.items.remove(selected_item);
+                            }
+                        }
                         _ => {},
                     }
                 }
