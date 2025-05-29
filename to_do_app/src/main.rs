@@ -107,6 +107,7 @@ fn render(frame: &mut Frame, app_state: &mut AppState){
             .iter()
             .map(|x| ListItem::from(x.description.clone()))
         )
+        .highlight_symbol(">")
         .highlight_style(Style::default().fg(Color::Green.into()));
 
     frame.render_stateful_widget(list, inner_area, &mut app_state.list_state);
