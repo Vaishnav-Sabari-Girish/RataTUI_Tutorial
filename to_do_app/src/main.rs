@@ -1,8 +1,8 @@
-use color_eyre::eyre::{Ok, Result};
+use color_eyre::{eyre::{Ok, Result}};
 use ratatui::{
     crossterm::{event::{
         self, Event
-    }, style::Color}, layout::{Constraint, Layout}, style::Stylize, widgets::{Block, BorderType, List, ListItem, Paragraph, Widget}, DefaultTerminal, Frame
+    }, style::Color}, layout::{Constraint, Layout}, style::{Style, Stylize}, widgets::{Block, BorderType, List, ListItem, ListState, Paragraph, Widget}, DefaultTerminal, Frame
 };
 
 
@@ -10,6 +10,7 @@ use ratatui::{
 #[derive(Debug, Default)]
 struct AppState {
     items: Vec<TodoItems>,
+    list_state: ListState,
 }
 
 
@@ -66,6 +67,18 @@ fn run(mut terminal: DefaultTerminal, app_state: &mut AppState) -> Result<()> {
                     break;
                 }
 
+                event::KeyCode::Char(char) => {
+                    match char {
+                        'j' => {
+                            app_state.list_state.select_next();
+                        }
+                        'k' => {
+                            app_state.list_state.select_previous();
+                        }
+                        _ => {},
+                    }
+                }
+
                 _ => todo!(),
             }
         }
@@ -73,7 +86,7 @@ fn run(mut terminal: DefaultTerminal, app_state: &mut AppState) -> Result<()> {
     Ok(())
 }
 
-fn render(frame: &mut Frame, app_state: &AppState){
+fn render(frame: &mut Frame, app_state: &mut AppState){
     let [border_area] = Layout::vertical([Constraint::Fill(1)]).
         margin(1).
         areas(frame.area());
@@ -88,11 +101,13 @@ fn render(frame: &mut Frame, app_state: &AppState){
 
     //Paragraph::new("Hello from application").render(frame.area(), frame.buffer_mut());
 
-    List::new(
+    let list = List::new(
         app_state
             .items
             .iter()
             .map(|x| ListItem::from(x.description.clone()))
         )
-        .render(inner_area, frame.buffer_mut());
+        .highlight_style(Style::default().fg(Color::Green.into()));
+
+    frame.render_stateful_widget(list, inner_area, &mut app_state.list_state);
 }
