@@ -1,7 +1,7 @@
 use color_eyre::{eyre::{Ok, Result}};
 use ratatui::{
     crossterm::{event::{
-        self, Event
+        self, Event, KeyEvent
     }, style::Color}, layout::{Constraint, Layout}, style::{Style, Stylize}, widgets::{Block, BorderType, List, ListItem, ListState, Paragraph, Widget}, DefaultTerminal, Frame
 };
 
@@ -11,6 +11,7 @@ use ratatui::{
 struct AppState {
     items: Vec<TodoItems>,
     list_state: ListState,
+    is_add_new: bool,
 }
 
 
@@ -23,6 +24,8 @@ struct TodoItems {
 
 fn main() -> Result<()> {
     let mut state = AppState::default();
+    state.is_add_new = false;
+
     state.items.push(TodoItems{
         is_done: false, 
         description: String::from("Finish the app")
@@ -62,34 +65,46 @@ fn run(mut terminal: DefaultTerminal, app_state: &mut AppState) -> Result<()> {
         //Keybinding 
 
         if let Event::Key(key) = event::read()? {
-            match key.code {
-                event::KeyCode::Esc => {
-                    break;
-                }
-
-                event::KeyCode::Char(char) => {
-                    match char {
-                        'j' => {
-                            app_state.list_state.select_next();
-                        }
-                        'k' => {
-                            app_state.list_state.select_previous();
-                        }
-                        'D' => {
-                            if let Some(selected_item) = app_state.list_state.selected(){
-                                app_state.items.remove(selected_item);
-                            }
-                        }
-                        _ => {},
-                    }
-                }
-
-                _ => todo!(),
+            if handle_key(key, app_state){
+                break;
             }
         }
     }
     Ok(())
 }
+
+fn handle_key(key: KeyEvent, app_state: &mut AppState) -> bool {
+    match key.code {
+        event::KeyCode::Esc => {
+            return true;
+        }
+
+        event::KeyCode::Char(char) => {
+            match char {
+                'j' => {
+                    app_state.list_state.select_next();
+                }
+                'k' => {
+                    app_state.list_state.select_previous();
+                }
+                'D' => {
+                    if let Some(selected_item) = app_state.list_state.selected(){
+                        app_state.items.remove(selected_item);
+                    }
+                }
+                'A' => {
+                    app_state.is_add_new = true; 
+                }
+                _ => {},
+            }
+        }
+
+        _ => {},
+    }
+    false
+
+}
+
 
 fn render(frame: &mut Frame, app_state: &mut AppState){
     let [border_area] = Layout::vertical([Constraint::Fill(1)]).
