@@ -65,12 +65,32 @@ fn run(mut terminal: DefaultTerminal, app_state: &mut AppState) -> Result<()> {
         //Keybinding 
 
         if let Event::Key(key) = event::read()? {
-            if handle_key(key, app_state){
-                break;
+
+            if app_state.is_add_new {
+                if handle_add_new(key, app_state) {
+                    app_state.is_add_new = false;
+                }
+            } else {
+                if handle_key(key, app_state){
+                    break;
+                }
             }
         }
     }
     Ok(())
+}
+
+fn handle_add_new(key: KeyEvent, app_state: &mut AppState)-> bool {
+    match key.code {
+        event::KeyCode::Esc => {
+            return true;
+        }
+        event::KeyCode::Enter => {
+            return true;
+        }
+        _ => {}, 
+    }
+    false
 }
 
 fn handle_key(key: KeyEvent, app_state: &mut AppState) -> bool {
@@ -131,4 +151,8 @@ fn render(frame: &mut Frame, app_state: &mut AppState){
         .highlight_style(Style::default().fg(Color::Green.into()));
 
     frame.render_stateful_widget(list, inner_area, &mut app_state.list_state);
+
+    if app_state.is_add_new {
+        Paragraph::new("Hello from application").render(frame.area(), frame.buffer_mut());
+    }
 }
